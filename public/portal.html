@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OrphanGuard | Facility Portal Concept</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { background: var(--bg-primary); }
+    .portal-demo-banner { max-width: 1400px; margin: 16px auto -12px; padding: 12px 15px; border: 1px solid rgba(251,191,36,.3); border-radius: 12px; background: rgba(251,191,36,.08); color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+    .portal-demo-banner strong { color: var(--warning); }
+    @media (max-width: 760px) { .portal-demo-banner { margin: 12px 14px -14px; } }
+
+    .portal-topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 100;
+      background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; padding: 0 28px;
+    }
+    .portal-topbar-brand { display: flex; align-items: center; gap: 12px; }
+    .portal-topbar-brand h1 { font-size: 16px; font-weight: 900; letter-spacing: -0.3px; }
+    .portal-topbar-brand span { font-size: 10px; color: var(--accent); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+    .portal-topbar-right { display: flex; align-items: center; gap: 16px; }
+    .portal-topbar-org { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .portal-topbar-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; background: var(--bg-card); border: 1px solid var(--border); }
+
+    .portal-body { margin-top: 60px; padding: 28px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+
+    .portal-nav {
+      display: flex; gap: 4px; margin-bottom: 24px;
+      background: var(--bg-secondary); padding: 4px; border-radius: var(--radius); border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .portal-nav-btn {
+      padding: 10px 20px; border: none; background: none; color: var(--text-secondary);
+      font-size: 13px; font-weight: 600; cursor: pointer; border-radius: var(--radius-sm);
+      transition: var(--transition); white-space: nowrap; font-family: inherit;
+    }
+    .portal-nav-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+    .portal-nav-btn.active { background: var(--accent); color: #000; font-weight: 700; }
+
+    .portal-page { display: none; animation: page-in 0.3s ease-out; }
+    .portal-page.active { display: block; }
+
+    .portal-welcome { font-size: 22px; font-weight: 800; letter-spacing: -0.6px; margin-bottom: 20px; }
+    .portal-welcome span { color: var(--accent); }
+
+    .portal-login-wrap { display: flex; align-items: center; justify-content: center; min-height: 80vh; }
+    .portal-login-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
+      padding: 48px 40px; max-width: 460px; width: 100%; text-align: center; box-shadow: var(--shadow-lg);
+    }
+    .portal-login-box h2 { font-size: 24px; font-weight: 900; margin: 20px 0 8px; }
+    .portal-login-box p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin-bottom: 28px; }
+
+    .portal-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+
+    .portal-main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .portal-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+    .portal-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .portal-card-head {
+      padding: 14px 18px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 13px;
+      display: flex; justify-content: space-between; align-items: center; background: var(--bg-secondary);
+    }
+    .portal-card-body { padding: 16px 18px; max-height: 420px; overflow-y: auto; }
+
+    .portal-big-score {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 32px; display: flex; align-items: center; gap: 32px;
+    }
+    .pbs-grade {
+      width: 90px; height: 90px; border-radius: 50%; border: 4px solid;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 42px; font-weight: 900; flex-shrink: 0;
+    }
+    .pbs-info { flex: 1; }
+    .pbs-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .pbs-score { font-size: 48px; font-weight: 900; letter-spacing: -2px; }
+    .pbs-score small { font-size: 20px; color: var(--text-tertiary); font-weight: 600; }
+    .pbs-bar { width: 100%; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.06); overflow: hidden; margin-top: 10px; }
+    .pbs-bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+    .pbs-rank {
+      text-align: center; padding: 16px 28px; background: var(--bg-secondary); border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .pbs-rank-num { font-size: 44px; font-weight: 900; color: var(--accent); letter-spacing: -2px; }
+    .pbs-rank-label { font-size: 11px; color: var(--text-tertiary); font-weight: 600; }
+    .pbs-rank-badge {
+      margin-top: 8px; padding: 4px 14px; border-radius: 20px; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;
+    }
+    .pbs-rank-badge.top { background: var(--success-glow); color: var(--success); }
+    .pbs-rank-badge.mid { background: var(--accent-glow); color: var(--accent); }
+    .pbs-rank-badge.low { background: var(--danger-glow); color: var(--danger); }
+
+    .compare-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+    .compare-row:last-child { margin-bottom: 0; }
+    .compare-label { min-width: 80px; text-align: right; }
+    .compare-bar { flex: 1; height: 14px; border-radius: 7px; background: rgba(255,255,255,0.04); position: relative; overflow: hidden; }
+    .compare-you { position: absolute; top: 0; left: 0; height: 7px; border-radius: 7px 7px 0 0; background: var(--accent); }
+    .compare-avg { position: absolute; bottom: 0; left: 0; height: 7px; border-radius: 0 0 7px 7px; background: rgba(255,255,255,0.12); }
+    .compare-vals { min-width: 90px; font-size: 11px; }
+    .compare-legend { display: flex; gap: 16px; margin-top: 14px; font-size: 10px; color: var(--text-tertiary); }
+    .compare-legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+
+    .checklist-item {
+      display: flex; align-items: flex-start; gap: 12px; padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .checklist-item:last-child { border-bottom: none; }
+    .cl-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .cl-label { font-size: 13px; font-weight: 600; }
+    .cl-tip { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+    .cl-status { margin-left: auto; padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .cl-status.pass { background: var(--success-glow); color: var(--success); }
+    .cl-status.fail { background: var(--danger-glow); color: var(--danger); }
+
+    .improve-row {
+      display: flex; align-items: center; gap: 14px; padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .improve-row:last-child { border-bottom: none; }
+    .improve-icon {
+      width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--accent-glow);
+      display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+    }
+    .improve-title { font-size: 13px; font-weight: 700; }
+    .improve-desc { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+    .improve-pts {
+      background: var(--accent-glow); color: var(--accent); padding: 4px 10px;
+      border-radius: 6px; font-size: 10px; font-weight: 800; white-space: nowrap; margin-left: auto;
+    }
+
+    .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .quick-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 22px 12px; border-radius: var(--radius); border: 1px solid var(--border);
+      background: var(--bg-secondary); color: var(--text-primary); cursor: pointer;
+      font-size: 12px; font-weight: 600; font-family: inherit; transition: var(--transition);
+    }
+    .quick-btn:hover { border-color: var(--accent); background: var(--accent-glow); transform: translateY(-2px); }
+    .quick-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+
+    .zone-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .zone-row:last-child { border-bottom: none; }
+    .zone-row-name { min-width: 110px; font-size: 13px; font-weight: 600; }
+    .zone-row-bar { flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .zone-row-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    .zone-row-count { font-size: 14px; font-weight: 800; color: var(--accent); min-width: 50px; text-align: right; }
+    .zone-row-count span { font-size: 11px; color: var(--text-tertiary); font-weight: 600; }
+
+    .child-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .child-row:last-child { border-bottom: none; }
+    .child-avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow);
+      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;
+      color: var(--accent); flex-shrink: 0; border: 1px solid rgba(16,185,129,0.15);
+    }
+    .child-name { font-size: 13px; font-weight: 600; }
+    .child-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+    .child-info { flex: 1; }
+
+    @media (max-width: 1024px) {
+      .portal-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .portal-main-grid { grid-template-columns: 1fr; }
+      .portal-two-col { grid-template-columns: 1fr; }
+      .quick-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .portal-body { padding: 16px; }
+      .portal-topbar { padding: 0 16px; }
+      .portal-topbar-org { display: none; }
+      .portal-big-score { flex-wrap: wrap; padding: 20px; gap: 16px; }
+      .pbs-grade { width: 64px; height: 64px; font-size: 30px; }
+      .pbs-score { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="portal-topbar">
+    <div class="portal-topbar-brand">
+      <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+        <defs><linearGradient id="sg" x1="0" y1="0" x2="36" y2="36"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#34d399"/></linearGradient></defs>
+        <path d="M18 2L4 8v10c0 9.55 5.97 18.48 14 20 8.03-1.52 14-10.45 14-20V8L18 2z" fill="url(#sg)" opacity="0.15" stroke="url(#sg)" stroke-width="1.5"/>
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" transform="translate(6,6) scale(0.7)" fill="url(#sg)" opacity="0.6"/>
+      </svg>
+      <div>
+        <h1>OrphanGuard</h1>
+        <span>Facility Portal Concept</span>
+      </div>
+    </div>
+    <div class="portal-topbar-right">
+      <div class="portal-topbar-org" id="topbar-org-name"></div>
+      <div class="portal-topbar-status" id="topbar-status">
+        <span class="prototype-state">LOCAL DEMO</span>
+        <span id="topbar-time">--</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="portal-body">
+    <div class="portal-demo-banner" role="status"><strong>Pitch demo · synthetic data.</strong> Facility names, people, counts, reminders, and events are fictional. This page has no institution authentication, live feeds, AI model, or external connections. Do not enter real or sensitive details.</div>
+    <div id="portal-root"></div>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal-overlay" id="child-modal">
+    <div class="modal">
+      <h3>Add Sample Child Profile</h3>
+      <form id="child-form" onsubmit="pAddChild(event)">
+        <input type="hidden" name="orphanage_id" id="child-oid">
+        <div class="form-row">
+          <div class="form-group"><label>Fictional label (not stored)</label><input type="text" name="name" placeholder="Demo Child" required></div>
+          <div class="form-group"><label>Example age</label><input type="number" name="age" min="0" max="18" required></div>
+        </div>
+        <div class="form-group"><label>Gender</label><select name="gender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('child-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add sample record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="visitor-modal">
+    <div class="modal">
+      <h3>Add Sample Visitor Flow</h3>
+      <form id="visitor-form" onsubmit="pAddVisitor(event)">
+        <input type="hidden" name="orphanage_id" id="visitor-oid">
+        <div class="form-group"><label>Fictional label (not stored)</label><input type="text" name="name" placeholder="Sample Visitor" required></div>
+        <div class="form-group"><label>Example purpose</label><textarea name="purpose" rows="2" placeholder="Sample visit workflow" required></textarea></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('visitor-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Check In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+let orphanages = [];
+let currentOrg = null;
+let ws;
+
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}`);
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (!currentOrg) return;
+    if (data.type === 'alert' || data.type === 'incident' || data.type === 'risk_update') {
+      if (data.alert?.orphanage_id === currentOrg.id || data.incident?.orphanage_id === currentOrg.id || data.orphanage_id === currentOrg.id) {
+        loadDashboard();
+      }
+    }
+  };
+  ws.onclose = () => setTimeout(connectWS, 3000);
+  ws.onerror = () => ws.close();
+}
+connectWS();
+
+function updateClock() {
+  const el = document.getElementById('topbar-time');
+  if (el) el.textContent = new Date().toLocaleString('en-PK', { weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+async function init() {
+  const res = await fetch('/api/orphanages');
+  orphanages = await res.json();
+  showLogin();
+}
+
+function showLogin() {
+  document.getElementById('topbar-org-name').textContent = '';
+  document.getElementById('portal-root').innerHTML = `
+    <div class="portal-login-wrap">
+      <div class="portal-login-box">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" style="animation: shield-glow 4s ease-in-out infinite">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <h2>Orphanage Portal</h2>
+        <p>Sign in to access your orphanage's dedicated management dashboard, safety scores, compliance reports, and more.</p>
+        <div class="form-group">
+          <label>Select Your Orphanage</label>
+          <select id="login-select" style="width:100%;padding:14px 18px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-size:15px;font-family:inherit;cursor:pointer">
+            <option value="">-- Choose orphanage --</option>
+            ${orphanages.map(o => `<option value="${o.id}">${o.name} — ${o.city}</option>`).join('')}
+          </select>
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="doLogin()">Sign In</button>
+        <div style="margin-top:20px;font-size:11px;color:var(--text-tertiary)">
+          <a href="/" style="color:var(--accent);text-decoration:none">&#8592; Go to Command Center</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function doLogin() {
+  const sel = document.getElementById('login-select');
+  if (!sel || !sel.value) return;
+  currentOrg = orphanages.find(o => o.id === parseInt(sel.value));
+  if (!currentOrg) return;
+  document.getElementById('topbar-org-name').textContent = currentOrg.name;
+  loadDashboard();
+}
+
+function logout() {
+  currentOrg = null;
+  showLogin();
+}
+
+let currentTab = 'dashboard';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.portal-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.portal-page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('ptab-' + tab);
+  if (el) el.classList.add('active');
+
+  if (tab === 'dashboard') loadDashboard();
+  else if (tab === 'children') loadChildrenTab();
+  else if (tab === 'visitors') loadVisitorsTab();
+  else if (tab === 'alerts') loadAlertsTab();
+  else if (tab === 'incidents') loadIncidentsTab();
+  else if (tab === 'zones') loadZonesTab();
+}
+
+async function loadDashboard() {
+  const o = currentOrg;
+  const oid = o.id;
+  const [statsRes, childrenRes, visitorsRes, alertsRes, incidentsRes, zonesRes, rankingsRes] = await Promise.all([
+    fetch('/api/stats?orphanage_id=' + oid), fetch('/api/children?orphanage_id=' + oid),
+    fetch('/api/visitors?orphanage_id=' + oid), fetch('/api/alerts?orphanage_id=' + oid),
+    fetch('/api/incidents?orphanage_id=' + oid), fetch('/api/zones?orphanage_id=' + oid),
+    fetch('/api/rankings'),
+  ]);
+  const [stats, children, visitors, alerts, incidents, zones, rankings] = await Promise.all([
+    statsRes.json(), childrenRes.json(), visitorsRes.json(), alertsRes.json(), incidentsRes.json(), zonesRes.json(), rankingsRes.json()
+  ]);
+
+  const rank = rankings.find(r => r.id === oid);
+  const avgScore = rankings.length > 0 ? Math.round(rankings.reduce((s, r) => s + r.score, 0) / rankings.length) : 0;
+  const avgResp = rankings.length > 0 ? Math.round(rankings.reduce((s, r) => s + r.responseRate, 0) / rankings.length) : 0;
+  const avgStaff = rankings.length > 0 ? Math.round(rankings.reduce((s, r) => s + r.staffRatio, 0) / rankings.length) : 0;
+  const avgCam = rankings.length > 0 ? Math.round(rankings.reduce((s, r) => s + r.cameraCoverage, 0) / rankings.length) : 0;
+  const activeV = visitors.filter(v => v.status === 'checked_in');
+  const pendAlerts = alerts.filter(a => !a.acknowledged);
+  const openIncs = incidents.filter(i => !i.reviewed);
+  const gc = rank ? (rank.grade === 'A' ? 'var(--success)' : rank.grade === 'B' ? 'var(--accent)' : rank.grade === 'C' ? 'var(--warning)' : 'var(--danger)') : 'var(--text-secondary)';
+
+  const checks = [];
+  if (rank) {
+    checks.push({ label: 'Camera Coverage', ok: rank.cameraCoverage >= 80, val: rank.cameraCoverage + '%', tip: rank.cameraCoverage < 80 ? `Install ${Math.max(1, Math.ceil(o.total_children / 8) - o.cameras)} more cameras` : 'Meets standard' });
+    checks.push({ label: 'Staff Ratio (1:3)', ok: rank.staffRatio >= 30, val: rank.staffRatio + '%', tip: rank.staffRatio < 30 ? `Hire ${Math.max(1, Math.ceil(o.total_children * 0.3) - o.staff_count)} more staff` : 'Meets standard' });
+    checks.push({ label: 'Incident Response', ok: rank.responseRate >= 90, val: rank.responseRate + '%', tip: rank.responseRate < 90 ? 'Review open incidents promptly' : 'Excellent' });
+    checks.push({ label: 'System Online', ok: o.status === 'online', val: o.status.toUpperCase(), tip: o.status !== 'online' ? 'Restore connection' : 'Operational' });
+    checks.push({ label: 'Risk Level', ok: o.risk_level === 'low', val: o.risk_level.toUpperCase(), tip: o.risk_level !== 'low' ? 'Resolve critical issues' : 'Clear' });
+    checks.push({ label: 'Critical Incidents', ok: rank.criticalIncidents === 0, val: String(rank.criticalIncidents), tip: rank.criticalIncidents > 0 ? 'Urgent review needed' : 'None' });
+  }
+  const passed = checks.filter(c => c.ok).length;
+
+  const tips = [];
+  if (rank) {
+    if (rank.cameraCoverage < 80) tips.push({ icon: '&#128247;', title: 'Increase Camera Coverage', desc: `Current ${rank.cameraCoverage}% → Target 80%`, pts: '+5 pts' });
+    if (rank.staffRatio < 30) tips.push({ icon: '&#128101;', title: 'Hire More Staff', desc: `Current ratio ${rank.staffRatio}% → Target 30%`, pts: '+5 pts' });
+    if (rank.responseRate < 90) tips.push({ icon: '&#9201;', title: 'Faster Response', desc: `Review incidents within 1 hour`, pts: '+5 pts' });
+    if (rank.criticalIncidents > 0) tips.push({ icon: '&#128680;', title: 'Resolve Critical', desc: `${rank.criticalIncidents} critical incidents open`, pts: `+${rank.criticalIncidents * 8} pts` });
+    if (rank.openIncidents > 0) tips.push({ icon: '&#9888;', title: 'Clear Open Incidents', desc: `${rank.openIncidents} pending review`, pts: `+${rank.openIncidents * 4} pts` });
+    if (o.risk_level === 'high') tips.push({ icon: '&#128308;', title: 'Lower Risk Level', desc: 'Resolve incidents to reduce risk', pts: '+15 pts' });
+    if (tips.length === 0) tips.push({ icon: '&#11088;', title: 'Excellent!', desc: 'Maintain current standards', pts: 'Top tier' });
+  }
+
+  const root = document.getElementById('portal-root');
+  root.innerHTML = `
+    <div class="portal-nav">
+      <button class="portal-nav-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="portal-nav-btn" data-tab="children" onclick="switchTab('children')">Children</button>
+      <button class="portal-nav-btn" data-tab="visitors" onclick="switchTab('visitors')">Visitors</button>
+      <button class="portal-nav-btn" data-tab="alerts" onclick="switchTab('alerts')">Alerts</button>
+      <button class="portal-nav-btn" data-tab="incidents" onclick="switchTab('incidents')">AI Incidents</button>
+      <button class="portal-nav-btn" data-tab="zones" onclick="switchTab('zones')">Live Zones</button>
+      <button class="portal-nav-btn" style="margin-left:auto;color:var(--text-tertiary)" onclick="logout()">&#8592; Switch Orphanage</button>
+    </div>
+
+    <div class="portal-page active" id="ptab-dashboard">
+      <div class="portal-welcome">Welcome back, <span>${o.name}</span></div>
+
+      ${rank ? `
+      <div class="portal-big-score" style="margin-bottom:24px">
+        <div class="pbs-grade" style="color:${gc};border-color:${gc}">${rank.grade}</div>
+        <div class="pbs-info">
+          <div class="pbs-label">Safety Score</div>
+          <div class="pbs-score" style="color:${gc}">${rank.score}<small>/100</small></div>
+          <div class="pbs-bar"><div class="pbs-bar-fill" style="width:${rank.score}%;background:${gc}"></div></div>
+        </div>
+        <div class="pbs-rank">
+          <div class="pbs-rank-num">#${rank.rank}</div>
+          <div class="pbs-rank-label">of ${rankings.length} in Punjab</div>
+          <div class="pbs-rank-badge ${rank.rank <= 3 ? 'top' : rank.rank <= Math.ceil(rankings.length / 2) ? 'mid' : 'low'}">${rank.rank <= 3 ? 'Top Performer' : rank.rank <= Math.ceil(rankings.length / 2) ? 'Above Average' : 'Needs Improvement'}</div>
+        </div>
+      </div>` : ''}
+
+      <div class="portal-kpi-grid">
+        <div class="stat-card green"><div class="label">Children</div><div class="value">${stats.totalChildren}</div><div class="sub">Registered</div></div>
+        <div class="stat-card yellow"><div class="label">Visitors</div><div class="value">${activeV.length}</div><div class="sub">On premises</div></div>
+        <div class="stat-card red"><div class="label">Alerts</div><div class="value">${pendAlerts.length}</div><div class="sub">Unresolved</div></div>
+        <div class="stat-card purple"><div class="label">AI Incidents</div><div class="value">${openIncs.length}</div><div class="sub">Open</div></div>
+      </div>
+
+      <div class="portal-card" style="margin-bottom:14px">
+        <div class="portal-card-head"><span>&#9889; Quick Actions</span></div>
+        <div class="portal-card-body">
+          <div class="quick-grid">
+            <button class="quick-btn" onclick="document.getElementById('child-oid').value=${oid};openModal('child-modal')">
+              <span class="quick-icon" style="background:rgba(16,185,129,0.1);color:var(--success)">&#128118;</span>Add Child
+            </button>
+            <button class="quick-btn" onclick="document.getElementById('visitor-oid').value=${oid};openModal('visitor-modal')">
+              <span class="quick-icon" style="background:rgba(139,92,246,0.1);color:var(--purple)">&#128100;</span>Check In Visitor
+            </button>
+            <button class="quick-btn" onclick="switchTab('alerts')">
+              <span class="quick-icon" style="background:rgba(239,68,68,0.1);color:var(--danger)">&#128276;</span>View Alerts (${pendAlerts.length})
+            </button>
+            <button class="quick-btn" onclick="switchTab('incidents')">
+              <span class="quick-icon" style="background:rgba(251,191,36,0.1);color:var(--warning)">&#9888;</span>AI Incidents (${openIncs.length})
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="portal-main-grid">
+        <div>
+          ${rank ? `
+          <div class="portal-card" style="margin-bottom:14px">
+            <div class="portal-card-head"><span>&#128200; Provincial Comparison</span><span style="font-size:11px;color:var(--text-tertiary)">You vs Average</span></div>
+            <div class="portal-card-body">
+              <div class="compare-row">
+                <span class="compare-label">Score</span>
+                <div class="compare-bar"><div class="compare-you" style="width:${rank.score}%"></div><div class="compare-avg" style="width:${avgScore}%"></div></div>
+                <span class="compare-vals"><strong style="color:var(--accent)">${rank.score}</strong> / ${avgScore}</span>
+              </div>
+              <div class="compare-row">
+                <span class="compare-label">Response</span>
+                <div class="compare-bar"><div class="compare-you" style="width:${rank.responseRate}%"></div><div class="compare-avg" style="width:${avgResp}%"></div></div>
+                <span class="compare-vals"><strong style="color:var(--accent)">${rank.responseRate}%</strong> / ${avgResp}%</span>
+              </div>
+              <div class="compare-row">
+                <span class="compare-label">Staff Ratio</span>
+                <div class="compare-bar"><div class="compare-you" style="width:${Math.min(rank.staffRatio,100)}%"></div><div class="compare-avg" style="width:${Math.min(avgStaff,100)}%"></div></div>
+                <span class="compare-vals"><strong style="color:var(--accent)">${rank.staffRatio}%</strong> / ${avgStaff}%</span>
+              </div>
+              <div class="compare-row">
+                <span class="compare-label">Camera</span>
+                <div class="compare-bar"><div class="compare-you" style="width:${rank.cameraCoverage}%"></div><div class="compare-avg" style="width:${avgCam}%"></div></div>
+                <span class="compare-vals"><strong style="color:var(--accent)">${rank.cameraCoverage}%</strong> / ${avgCam}%</span>
+              </div>
+              <div class="compare-legend">
+                <span><span class="compare-legend-dot" style="background:var(--accent)"></span>Your Orphanage</span>
+                <span><span class="compare-legend-dot" style="background:rgba(255,255,255,0.12)"></span>Punjab Average</span>
+              </div>
+            </div>
+          </div>` : ''}
+
+          <div class="portal-card">
+            <div class="portal-card-head"><span>&#128200; Improvement Plan</span><span style="font-size:11px;color:var(--accent);font-weight:700">${tips.length} items</span></div>
+            <div class="portal-card-body">
+              ${tips.map(t => `<div class="improve-row"><div class="improve-icon">${t.icon}</div><div style="flex:1"><div class="improve-title">${t.title}</div><div class="improve-desc">${t.desc}</div></div><div class="improve-pts">${t.pts}</div></div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="portal-card" style="margin-bottom:14px">
+            <div class="portal-card-head"><span>&#9989; Compliance</span><span style="font-size:11px;font-weight:700;color:${passed === checks.length ? 'var(--success)' : 'var(--warning)'}">${passed}/${checks.length}</span></div>
+            <div class="portal-card-body">
+              ${checks.map(c => `<div class="checklist-item"><div class="cl-icon">${c.ok ? '&#9989;' : '&#10060;'}</div><div style="flex:1"><div class="cl-label">${c.label}</div><div class="cl-tip">${c.tip}</div></div><div class="cl-status ${c.ok ? 'pass' : 'fail'}">${c.val}</div></div>`).join('')}
+            </div>
+          </div>
+
+          <div class="portal-card">
+            <div class="portal-card-head"><span>&#128205; Live Zones</span><span style="font-size:11px;color:var(--text-tertiary)">${zones.length} active</span></div>
+            <div class="portal-card-body">
+              ${zones.length === 0 ? '<div class="detail-empty">No zones</div>' : zones.map(z => {
+                const pct = z.expected_count > 0 ? Math.min(100, (z.current_count / z.expected_count) * 100) : 0;
+                const bc = pct > 100 ? 'var(--danger)' : pct > 80 ? 'var(--warning)' : 'var(--success)';
+                return `<div class="zone-row"><div class="zone-row-name">${z.name}</div><div class="zone-row-bar"><div class="zone-row-fill" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div><div class="zone-row-count">${z.current_count}<span>/${z.expected_count}</span></div></div>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-page" id="ptab-children"></div>
+    <div class="portal-page" id="ptab-visitors"></div>
+    <div class="portal-page" id="ptab-alerts"></div>
+    <div class="portal-page" id="ptab-incidents"></div>
+    <div class="portal-page" id="ptab-zones"></div>
+  `;
+}
+
+async function loadChildrenTab() {
+  const res = await fetch('/api/children?orphanage_id=' + currentOrg.id);
+  const children = await res.json();
+  document.getElementById('ptab-children').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-size:20px;font-weight:800">Children Registry</h2>
+      <button class="btn btn-primary" onclick="document.getElementById('child-oid').value=${currentOrg.id};openModal('child-modal')">+ Add Child</button>
+    </div>
+    ${children.length === 0 ? '<div class="detail-empty">No children registered</div>' : `
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Age</th><th>Gender</th><th>Admitted</th><th>Medical Notes</th></tr></thead>
+      <tbody>${children.map(c => `<tr><td><div style="display:flex;align-items:center;gap:8px"><div class="child-avatar">${c.name.charAt(0)}</div><strong>${c.name}</strong></div></td><td>${c.age}</td><td>${c.gender}</td><td>${new Date(c.admitted_date).toLocaleDateString('en-PK')}</td><td>${c.medical_notes || '-'}</td></tr>`).join('')}</tbody>
+    </table>`}
+  `;
+}
+
+async function loadVisitorsTab() {
+  const res = await fetch('/api/visitors?orphanage_id=' + currentOrg.id);
+  const visitors = await res.json();
+  document.getElementById('ptab-visitors').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-size:20px;font-weight:800">Visitor Management</h2>
+      <button class="btn btn-primary" onclick="document.getElementById('visitor-oid').value=${currentOrg.id};openModal('visitor-modal')">+ Check In Visitor</button>
+    </div>
+    ${visitors.length === 0 ? '<div class="detail-empty">No visitor records</div>' : `
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>CNIC</th><th>Phone</th><th>Purpose</th><th>Check In</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${visitors.map(v => `<tr><td><strong>${v.name}</strong></td><td>${v.cnic || '-'}</td><td>${v.phone || '-'}</td><td>${v.purpose}</td><td>${new Date(v.check_in).toLocaleString('en-PK')}</td><td><span class="badge-status ${v.status}">${v.status.replace('_', ' ')}</span></td><td>${v.status === 'checked_in' ? `<button class="btn btn-outline btn-sm" onclick="pCheckout(${v.id})">Check Out</button>` : ''}</td></tr>`).join('')}</tbody>
+    </table>`}
+  `;
+}
+
+async function loadAlertsTab() {
+  const res = await fetch('/api/alerts?orphanage_id=' + currentOrg.id);
+  const alerts = await res.json();
+  document.getElementById('ptab-alerts').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-size:20px;font-weight:800">Security Alerts</h2>
+      <button class="btn btn-outline" onclick="loadAlertsTab()">Refresh</button>
+    </div>
+    <div class="alerts-list">${alerts.length === 0 ? '<div class="detail-empty">No alerts</div>' : alerts.map(a => {
+      const time = new Date(a.created_at).toLocaleTimeString('en-PK');
+      return `<div class="alert-item ${a.acknowledged ? 'acknowledged' : ''}" id="pa-${a.id}">
+        <div class="alert-severity ${a.severity}"></div>
+        <div class="alert-content"><div class="alert-msg">${a.message}</div><div class="alert-time">${a.type.replace(/_/g, ' ').toUpperCase()} &middot; ${time}</div></div>
+        <div class="alert-actions">${!a.acknowledged ? `<button class="btn-ack" onclick="pAckAlert(${a.id})">Acknowledge</button>` : '<span style="color:var(--success);font-size:12px">Resolved</span>'}</div>
+      </div>`;
+    }).join('')}</div>
+  `;
+}
+
+async function loadIncidentsTab() {
+  const res = await fetch('/api/incidents?orphanage_id=' + currentOrg.id);
+  const incidents = await res.json();
+  const icons = { physical_violence: '&#9994;', verbal_abuse: '&#128483;', harassment: '&#9888;', bullying: '&#128544;', neglect: '&#128557;', distress: '&#128546;', rough_handling: '&#9995;', unauthorized_contact: '&#128683;' };
+  document.getElementById('ptab-incidents').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-size:20px;font-weight:800">AI Detection Incidents</h2>
+      <button class="btn btn-outline" onclick="loadIncidentsTab()">Refresh</button>
+    </div>
+    <div class="alerts-list">${incidents.length === 0 ? '<div class="detail-empty">No incidents detected</div>' : incidents.map(i => {
+      const time = new Date(i.detected_at).toLocaleString('en-PK');
+      const icon = icons[i.type] || '&#9888;';
+      const cc = i.confidence > 85 ? 'var(--danger)' : i.confidence > 70 ? 'var(--warning)' : 'var(--accent)';
+      return `<div class="incident-item ${i.severity} ${i.reviewed ? 'reviewed' : ''}">
+        <div class="incident-icon ${i.severity}">${icon}</div>
+        <div class="incident-content">
+          <div class="inc-label">${i.label}</div>
+          <div class="inc-desc">${i.description}</div>
+          <div class="inc-meta">
+            <span>&#128337; ${time}</span><span>&#129302; ${i.ai_model}</span>
+            <span>Confidence: <span class="confidence-bar"><span class="fill" style="width:${i.confidence}%;background:${cc}"></span></span> ${i.confidence}%</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <span class="risk-badge ${i.severity}">${i.severity}</span>
+          ${i.reviewed ? '<div style="color:var(--success);font-size:11px;margin-top:6px">Reviewed</div>' : `<button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="pReviewInc(${i.id})">Mark Reviewed</button>`}
+        </div>
+      </div>`;
+    }).join('')}</div>
+  `;
+}
+
+async function loadZonesTab() {
+  const res = await fetch('/api/zones?orphanage_id=' + currentOrg.id);
+  const zones = await res.json();
+  document.getElementById('ptab-zones').innerHTML = `
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:20px">Live Zone Monitoring</h2>
+    ${zones.length === 0 ? '<div class="detail-empty">No zones configured</div>' : `
+    <div class="zone-grid">${zones.map(z => {
+      const pct = z.expected_count > 0 ? Math.min(150, (z.current_count / z.expected_count) * 100) : 0;
+      const st = pct > 120 ? 'danger' : pct > 90 ? 'warning' : '';
+      return `<div class="zone-card"><div class="zone-status ${st}"></div><div class="zone-name">${z.name}</div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${z.description}</div><div class="zone-count">${z.current_count}</div><div class="zone-expected">Expected: ${z.expected_count}</div></div>`;
+    }).join('')}</div>`}
+  `;
+}
+
+async function pAckAlert(id) {
+  await fetch(`/api/alerts/${id}/acknowledge`, { method: 'PUT' });
+  loadAlertsTab();
+}
+
+async function pReviewInc(id) {
+  await fetch(`/api/incidents/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'reviewed', reviewed: true }) });
+  loadIncidentsTab();
+}
+
+async function pCheckout(id) {
+  await fetch(`/api/visitors/${id}/checkout`, { method: 'PUT' });
+  loadVisitorsTab();
+}
+
+async function pAddChild(e) {
+  e.preventDefault();
+  await fetch('/api/children', { method: 'POST', body: new FormData(e.target) });
+  e.target.reset(); closeModal('child-modal'); loadChildrenTab();
+}
+
+async function pAddVisitor(e) {
+  e.preventDefault();
+  await fetch('/api/visitors', { method: 'POST', body: new FormData(e.target) });
+  e.target.reset(); closeModal('visitor-modal'); loadVisitorsTab();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+document.querySelectorAll('.modal-overlay').forEach(o => { o.addEventListener('click', (e) => { if (e.target === o) closeModal(o.id); }); });
+
+function portalText(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+  });
+}
+
+function showLogin() {
+  document.getElementById('topbar-org-name').textContent = 'Local preview · no authentication';
+  document.getElementById('portal-root').innerHTML =
+    '<div class="portal-login-wrap"><div class="portal-login-box"><span class="prototype-state">CLICK-THROUGH CONCEPT</span>' +
+    '<h2>Facility workspace</h2><p>Choose a fictional profile to preview a possible facility-side workflow. This is not a private or authenticated account.</p>' +
+    '<div class="form-group"><label>Select a sample facility</label><select id="login-select" style="width:100%;padding:14px 18px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-size:15px">' +
+    '<option value="">Choose a sample profile</option>' + orphanages.map(function (site) {
+      return '<option value="' + site.id + '">' + portalText(site.name) + ' · ' + portalText(site.city) + '</option>';
+    }).join('') + '</select></div><button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="doLogin()">Preview sample workspace</button>' +
+    '<div style="margin-top:20px;font-size:11px;color:var(--text-tertiary)"><a href="/" style="color:var(--accent);text-decoration:none">← Back to demo workspace</a></div></div></div>';
+}
+
+async function loadDashboard() {
+  if (!currentOrg) return;
+  const id = currentOrg.id;
+  const requests = await Promise.all([
+    fetch('/api/stats?orphanage_id=' + id), fetch('/api/children?orphanage_id=' + id),
+    fetch('/api/visitors?orphanage_id=' + id), fetch('/api/alerts?orphanage_id=' + id),
+    fetch('/api/incidents?orphanage_id=' + id), fetch('/api/zones?orphanage_id=' + id)
+  ]);
+  const data = await Promise.all(requests.map(function (response) { return response.json(); }));
+  const stats = data[0], children = data[1], visitors = data[2], alerts = data[3], scenarios = data[4], zones = data[5];
+  document.getElementById('topbar-org-name').textContent = currentOrg.name + ' · sample profile';
+  document.getElementById('portal-root').innerHTML =
+    '<div class="portal-nav">' +
+      '<button class="portal-nav-btn active" data-tab="dashboard" onclick="switchTab(&#39;dashboard&#39;)">Overview</button>' +
+      '<button class="portal-nav-btn" data-tab="children" onclick="switchTab(&#39;children&#39;)">Sample profiles</button>' +
+      '<button class="portal-nav-btn" data-tab="visitors" onclick="switchTab(&#39;visitors&#39;)">Visitor flow</button>' +
+      '<button class="portal-nav-btn" data-tab="alerts" onclick="switchTab(&#39;alerts&#39;)">Reminders</button>' +
+      '<button class="portal-nav-btn" data-tab="incidents" onclick="switchTab(&#39;incidents&#39;)">Review scenarios</button>' +
+      '<button class="portal-nav-btn" data-tab="zones" onclick="switchTab(&#39;zones&#39;)">Zone mockups</button>' +
+      '<button class="portal-nav-btn" style="margin-left:auto" onclick="logout()">Switch profile</button></div>' +
+    '<div class="portal-page active" id="ptab-dashboard"><div class="portal-welcome">Sample workspace · <span>' + portalText(currentOrg.name) + '</span></div>' +
+      '<div class="portal-demo-banner"><strong>Fictional profile.</strong> This preview is not a secure facility account. Counts are synthetic; nothing is connected to a real service.</div>' +
+      '<div class="portal-kpi-grid">' +
+        '<div class="stat-card green"><div class="label">Sample child records</div><div class="value">' + Number(stats.totalChildren || 0) + '</div><div class="sub">Fictional profiles</div></div>' +
+        '<div class="stat-card blue"><div class="label">Visitor workflow</div><div class="value">' + visitors.length + '</div><div class="sub">Sample records</div></div>' +
+        '<div class="stat-card yellow"><div class="label">Follow-up reminders</div><div class="value">' + alerts.length + '</div><div class="sub">Local demo queue</div></div>' +
+        '<div class="stat-card purple"><div class="label">AI assessments</div><div class="value">0</div><div class="sub">No model connected</div></div></div>' +
+      '<div class="portal-main-grid" style="margin-top:16px"><div class="portal-card"><div class="portal-card-head">Human-led workflow</div><div class="portal-card-body"><p>Review an illustrative item, document a next step, and keep the handoff visible to the team.</p><div class="quick-grid">' +
+        '<button class="quick-btn" onclick="switchTab(&#39;incidents&#39;)">Open sample review queue</button><button class="quick-btn" onclick="switchTab(&#39;alerts&#39;)">View follow-up reminders</button><button class="quick-btn" onclick="switchTab(&#39;visitors&#39;)">Preview visitor flow</button></div></div></div>' +
+      '<div class="portal-card"><div class="portal-card-head">Model and safeguarding readiness</div><div class="portal-card-body"><strong>No model or camera is connected.</strong><p class="readiness-footnote">No child risk score, identity recognition, emotion inference, or automated decision is produced.</p></div></div></div>' +
+      '<div class="detail-empty" style="margin-top:14px">' + zones.length + ' sample zone layouts · ' + scenarios.length + ' scripted review examples. No operational monitoring is taking place.</div></div>' +
+    '<div class="portal-page" id="ptab-children"></div><div class="portal-page" id="ptab-visitors"></div>' +
+    '<div class="portal-page" id="ptab-alerts"></div><div class="portal-page" id="ptab-incidents"></div><div class="portal-page" id="ptab-zones"></div>';
+}
+
+async function loadChildrenTab() {
+  const children = await fetch('/api/children?orphanage_id=' + currentOrg.id).then(function (r) { return r.json(); });
+  document.getElementById('ptab-children').innerHTML =
+    '<h2 style="font-size:20px;font-weight:800;margin-bottom:8px">Sample child profiles</h2><p class="readiness-footnote">Fictional demo labels only. No health or identifying details are included.</p>' +
+    (children.length ? '<table class="data-table"><thead><tr><th>Sample ID</th><th>Example age</th><th>Profile type</th><th>Created</th></tr></thead><tbody>' +
+      children.map(function (child) { return '<tr><td><strong>' + portalText(child.name) + '</strong></td><td>' + Number(child.age) + '</td><td>Fictional sample</td><td>Demo record</td></tr>'; }).join('') +
+      '</tbody></table>' : '<div class="detail-empty">No sample profiles.</div>');
+}
+
+async function loadVisitorsTab() {
+  const visitors = await fetch('/api/visitors?orphanage_id=' + currentOrg.id).then(function (r) { return r.json(); });
+  document.getElementById('ptab-visitors').innerHTML =
+    '<h2 style="font-size:20px;font-weight:800;margin-bottom:8px">Visitor workflow preview</h2><p class="readiness-footnote">No names, phone numbers, identity numbers, or real visits are used.</p>' +
+    (visitors.length ? '<table class="data-table"><thead><tr><th>Sample label</th><th>Purpose</th><th>Time</th><th>State</th><th></th></tr></thead><tbody>' +
+      visitors.map(function (visitor) {
+        return '<tr><td><strong>' + portalText(visitor.name) + '</strong></td><td>Sample workflow</td><td>' +
+          new Date(visitor.check_in).toLocaleString('en-PK') + '</td><td>' + portalText(visitor.status.replace('_', ' ')) + '</td><td>' +
+          (visitor.status === 'checked_in' ? '<button class="btn btn-outline btn-sm" onclick="pCheckout(' + visitor.id + ')">Preview check-out</button>' : '') + '</td></tr>';
+      }).join('') + '</tbody></table>' : '<div class="detail-empty">No sample visitor flows.</div>');
+}
+
+async function loadAlertsTab() {
+  const alerts = await fetch('/api/alerts?orphanage_id=' + currentOrg.id).then(function (r) { return r.json(); });
+  document.getElementById('ptab-alerts').innerHTML =
+    '<h2 style="font-size:20px;font-weight:800;margin-bottom:8px">Sample follow-up reminders</h2><p class="readiness-footnote">These local reminders do not indicate a real incident or request action in the real world.</p>' +
+    (alerts.length ? '<div class="alerts-list">' + alerts.map(function (alert) {
+      return '<div class="alert-item"><div class="alert-content"><div class="alert-msg">' + portalText(alert.message) + '</div><div class="alert-time">Fictional reminder</div></div>' +
+        (!alert.acknowledged ? '<button class="btn-ack" onclick="pAckAlert(' + alert.id + ')">Mark reviewed</button>' : '<span class="readiness-state">Reviewed in demo</span>') + '</div>';
+    }).join('') + '</div>' : '<div class="detail-empty">No sample reminders.</div>');
+}
+
+async function loadIncidentsTab() {
+  const scenarios = await fetch('/api/incidents?orphanage_id=' + currentOrg.id).then(function (r) { return r.json(); });
+  document.getElementById('ptab-incidents').innerHTML =
+    '<h2 style="font-size:20px;font-weight:800;margin-bottom:8px">Scripted review scenarios</h2><p class="readiness-footnote">No model detected these items. They are fictional examples for walking through human review.</p>' +
+    (scenarios.length ? '<div class="alerts-list">' + scenarios.map(function (item) {
+      return '<div class="incident-item"><div class="incident-content"><div class="inc-label">' + portalText(item.label) +
+        '</div><div class="inc-desc">' + portalText(item.description) + '</div><div class="inc-meta"><span>Scripted sample · no model score</span></div></div>' +
+        (!item.reviewed ? '<button class="btn btn-primary btn-sm" onclick="pReviewInc(' + item.id + ')">Mark reviewed</button>' : '<span class="readiness-state">Reviewed in demo</span>') + '</div>';
+    }).join('') + '</div>' : '<div class="detail-empty">No sample scenarios.</div>');
+}
+
+async function loadZonesTab() {
+  const zones = await fetch('/api/zones?orphanage_id=' + currentOrg.id).then(function (r) { return r.json(); });
+  document.getElementById('ptab-zones').innerHTML =
+    '<h2 style="font-size:20px;font-weight:800;margin-bottom:8px">Zone layout mockups</h2><p class="readiness-footnote">Zone names are illustrative. The sample counts below do not come from sensors or cameras.</p>' +
+    (zones.length ? '<div class="zone-grid">' + zones.map(function (zone) {
+      return '<div class="zone-card"><div class="zone-name">' + portalText(zone.name) + '</div><div class="readiness-state">Sample layout</div><div class="zone-count">—</div><div class="zone-expected">No live occupancy count</div></div>';
+    }).join('') + '</div>' : '<div class="detail-empty">No sample zone layouts.</div>');
+}
+
+async function pAddChild(event) {
+  event.preventDefault();
+  const id = Number(new FormData(event.target).get('orphanage_id')) || currentOrg.id;
+  const records = await fetch('/api/children?orphanage_id=' + id).then(function (r) { return r.json(); });
+  await fetch('/api/children', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Demo Child ' + String(records.length + 1).padStart(2, '0'), age: 10, gender: 'Sample record', medical_notes: '', orphanage_id: id })
+  });
+  event.target.reset(); closeModal('child-modal'); loadChildrenTab();
+}
+
+async function pAddVisitor(event) {
+  event.preventDefault();
+  const id = Number(new FormData(event.target).get('orphanage_id')) || currentOrg.id;
+  const records = await fetch('/api/visitors?orphanage_id=' + id).then(function (r) { return r.json(); });
+  await fetch('/api/visitors', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Sample Visitor ' + String(records.length + 1).padStart(2, '0'), purpose: 'Sample workflow', cnic: '', phone: '', orphanage_id: id })
+  });
+  event.target.reset(); closeModal('visitor-modal'); loadVisitorsTab();
+}
+
+init();
+</script>
+</body>
+</html>

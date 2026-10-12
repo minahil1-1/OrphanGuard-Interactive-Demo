@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OrphanGuard | Pitch Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-bg-pattern"></div>
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-logo">
+          <svg width="64" height="64" viewBox="0 0 36 36" fill="none">
+            <defs><linearGradient id="login-grad" x1="0" y1="0" x2="36" y2="36"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#34d399"/></linearGradient></defs>
+            <path d="M18 2L4 8v10c0 9.55 5.97 18.48 14 20 8.03-1.52 14-10.45 14-20V8L18 2z" fill="url(#login-grad)" opacity="0.15" stroke="url(#login-grad)" stroke-width="1.5"/>
+            <circle cx="18" cy="16" r="5" stroke="url(#login-grad)" stroke-width="1.5" fill="none"/>
+            <path d="M18 21c-4 0-7 2-7 4v1h14v-1c0-2-3-4-7-4z" fill="url(#login-grad)" opacity="0.6"/>
+          </svg>
+        </div>
+        <h1 class="login-title">OrphanGuard AI</h1>
+        <p class="login-subtitle">Care Coordination Concept · Pitch Demo</p>
+        <div class="login-badge">Independent concept · no government endorsement</div>
+        <div class="demo-disclosure"><strong>Demonstration only</strong><br>Facilities, people, counts, map points and events are synthetic examples. There is no live AI model, camera, messaging, agency connection or safeguarding intake. Do not enter real or sensitive information.</div>
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div class="login-field">
+            <label>Demo user</label>
+            <input type="text" id="login-email" placeholder="Enter demo user" required autocomplete="username">
+          </div>
+          <div class="login-field">
+            <label>Demo password</label>
+            <input type="password" id="login-password" placeholder="Enter demo password" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="login-btn">Open pitch demo</button>
+          <div class="login-demo-hint">
+            <span>Demo Access:</span> admin / admin123
+          </div>
+        </form>
+        <div class="login-footer-links">
+          <a href="#" onclick="event.preventDefault();showComplaintPortal()">Preview the sample concern workflow</a>
+          <a href="/pitch.html">Open the concept pitch overview</a>
+        </div>
+      </div>
+      <div class="login-info-panel">
+        <h2>A clearer view of care workflows</h2>
+        <p>A concept for bringing facility context, review steps and follow-up into one place. This screen uses fictional sample data to explore a possible pilot.</p>
+        <div class="login-stats-row">
+          <div class="login-stat"><div class="login-stat-val">83</div><div class="login-stat-label">Illustrative map points</div></div>
+          <div class="login-stat"><div class="login-stat-val">37</div><div class="login-stat-label">Sample localities</div></div>
+          <div class="login-stat"><div class="login-stat-val">0</div><div class="login-stat-label">Live connections</div></div>
+        </div>
+        <div class="login-features">
+          <div class="login-feature"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> Facility coverage map with clustered sample points</div>
+          <div class="login-feature"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span> Human-led review and follow-up workflow</div>
+          <div class="login-feature"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span> Sample facility coordination screens</div>
+          <div class="login-feature"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Model readiness gates and open questions</div>
+          <div class="login-feature"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Exportable pitch-demo summary</div>
+        </div>
+        <div class="login-org-badges">
+          <span>For discussion with potential partners</span>
+          <span>No institutional affiliation or certification claimed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANONYMOUS COMPLAINT PORTAL -->
+  <div id="complaint-portal" class="complaint-portal" style="display:none">
+    <div class="complaint-container">
+      <div class="complaint-card">
+        <button class="complaint-close" onclick="hideComplaintPortal()">&times;</button>
+        <div class="complaint-header">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5"><path d="M12 9v4m0 4h.01M3.26 19h17.48a1 1 0 0 0 .87-1.5L13.37 3.5a1 1 0 0 0-1.74 0L3.39 17.5a1 1 0 0 0 .87 1.5z"/></svg>
+          <h2>Sample concern workflow</h2>
+          <p>This non-operational concept screen does not receive, encrypt, forward, monitor or act on reports. Entries stay in this browser session. Do not enter real details.</p>
+        </div>
+        <form id="complaint-form" onsubmit="submitComplaint(event)">
+          <div class="complaint-field">
+            <label>Illustrative location</label>
+            <select id="complaint-orphanage" required>
+              <option value="">Select orphanage or location</option>
+              <option value="other">Other Location (specify below)</option>
+            </select>
+          </div>
+          <div class="complaint-field">
+            <label>Type of Concern</label>
+            <select id="complaint-type" required>
+              <option value="">Select type</option>
+              <option value="physical_abuse">Physical Abuse</option>
+              <option value="verbal_abuse">Verbal Abuse / Harassment</option>
+              <option value="neglect">Neglect</option>
+              <option value="exploitation">Child Exploitation</option>
+              <option value="missing_child">Missing Child</option>
+              <option value="unsafe_conditions">Unsafe Living Conditions</option>
+              <option value="staff_misconduct">Staff Misconduct</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="complaint-field">
+            <label>Sample description only</label>
+            <textarea id="complaint-description" rows="4" placeholder="Use fictional text only. Do not include names, dates or identifying details." required></textarea>
+          </div>
+          <div class="complaint-field">
+            <label>Urgency Level</label>
+            <div class="complaint-urgency">
+              <label class="urgency-option"><input type="radio" name="urgency" value="critical" required> <span class="urgency-badge critical">Critical — Child in immediate danger</span></label>
+              <label class="urgency-option"><input type="radio" name="urgency" value="high"> <span class="urgency-badge high">High — Ongoing abuse/neglect</span></label>
+              <label class="urgency-option"><input type="radio" name="urgency" value="medium"> <span class="urgency-badge medium">Medium — Concerning behavior</span></label>
+              <label class="urgency-option"><input type="radio" name="urgency" value="low"> <span class="urgency-badge low">Low — General concern</span></label>
+            </div>
+          </div>
+          <div class="complaint-field">
+            <label>Demo contact field (not sent)</label>
+            <input type="text" id="complaint-contact" placeholder="Leave blank; never use real contact details">
+          </div>
+          <button type="submit" class="complaint-submit">Preview sample confirmation</button>
+          <p class="complaint-disclaimer">Demo only. This is not an official reporting channel; nothing is sent and no response is provided.</p>
+        </form>
+        <div id="complaint-success" style="display:none">
+          <div class="complaint-success-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg></div>
+          <h3>Sample confirmation preview</h3>
+          <p>Reference Number: <strong id="complaint-ref"></strong></p>
+          <p>This reference exists only in this browser session. No report has been sent or stored.</p>
+          <p class="complaint-helpline">For emergencies, use a separately verified official service.</p>
+          <button class="login-btn" onclick="hideComplaintPortal()" style="margin-top:16px">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <defs>
+            <linearGradient id="shield-grad" x1="0" y1="0" x2="36" y2="36">
+              <stop offset="0%" stop-color="#10b981"/>
+              <stop offset="100%" stop-color="#34d399"/>
+            </linearGradient>
+          </defs>
+          <path d="M18 2L4 8v10c0 9.55 5.97 18.48 14 20 8.03-1.52 14-10.45 14-20V8L18 2z" fill="url(#shield-grad)" opacity="0.15" stroke="url(#shield-grad)" stroke-width="1.5"/>
+          <circle cx="18" cy="16" r="5" stroke="url(#shield-grad)" stroke-width="1.5" fill="none"/>
+          <path d="M18 21c-4 0-7 2-7 4v1h14v-1c0-2-3-4-7-4z" fill="url(#shield-grad)" opacity="0.6"/>
+        </svg>
+      </div>
+      <div>
+        <h1>OrphanGuard AI</h1>
+        <p>Independent Demo Workspace</p>
+      </div>
+    </div>
+    <div class="nav-item active" data-page="command">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> <span class="nav-text">Command Center</span>
+    </div>
+    <div class="nav-item" data-page="briefing">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> <span class="nav-text">Daily Briefing</span>
+    </div>
+    <div class="nav-item" data-page="map">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span> <span class="nav-text">Punjab Map</span>
+    </div>
+    <div class="nav-item" data-page="incidents">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M3.26 19h17.48a1 1 0 0 0 .87-1.5L13.37 3.5a1 1 0 0 0-1.74 0L3.39 17.5a1 1 0 0 0 .87 1.5z"/></svg></span> <span class="nav-text">Scenario Review</span>
+      <span class="badge" id="incident-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-item" data-page="emotions">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span> <span class="nav-text">Model Readiness</span>
+    </div>
+    <div class="nav-item" data-page="cameras">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span> <span class="nav-text">Camera Mockups</span>
+    </div>
+    <div class="nav-item" data-page="alerts">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> <span class="nav-text">Alerts</span>
+      <span class="badge" id="alert-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-item" data-page="anomalies">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> <span class="nav-text">Anomalies</span>
+    </div>
+    <div class="nav-item" data-page="children">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> <span class="nav-text">Children</span>
+    </div>
+    <div class="nav-item" data-page="visitors">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> <span class="nav-text">Visitors</span>
+    </div>
+    <div class="nav-item" data-page="rankings">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8m-4-4v4M6 12H2v9h4V12zm8-4h4v13h-4V8zM10 2h4v19h-4V2z"/></svg></span> <span class="nav-text">Rankings</span>
+    </div>
+    <div class="nav-item" data-page="analytics">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> <span class="nav-text">Analytics</span>
+    </div>
+    <div class="nav-item" data-page="activity">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span> <span class="nav-text">Activity Log</span>
+    </div>
+    <div class="nav-item" data-page="portal">
+      <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> <span class="nav-text">My Portal</span>
+    </div>
+
+    <div style="margin-top:auto;padding:18px 22px;border-top:1px solid var(--border)">
+      <label style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.8px;font-weight:700">Filter sample locality</label>
+      <select id="orphanage-filter" style="width:100%;margin-top:8px;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-primary);color:var(--text-primary);font-size:12px;font-family:inherit;cursor:pointer;outline:none">
+        <option value="">All sample sites</option>
+      </select>
+    </div>
+  </nav>
+
+  <!-- Global Search Overlay -->
+  <div class="search-overlay" id="search-overlay" onclick="if(event.target===this)closeGlobalSearch()">
+    <div class="search-modal">
+      <div class="search-modal-input">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="global-search-input" placeholder="Search orphanages, children, visitors, alerts..." oninput="runGlobalSearch(this.value)" autocomplete="off">
+        <kbd class="search-kbd">ESC</kbd>
+      </div>
+      <div class="search-results" id="global-search-results">
+        <div class="search-empty">Type to search across all data...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="pitch-demo-banner" role="status">
+      <div><strong>Pitch demo · synthetic data</strong><span>No live sites, personal records, camera feeds, AI model, official partners or outbound messaging are connected.</span></div>
+      <div class="demo-banner-actions"><a class="btn btn-outline btn-sm" href="/pitch.html">Pitch overview</a><button class="btn btn-outline btn-sm" onclick="runDemoScenario()">Run sample workflow</button><button class="btn btn-outline btn-sm" onclick="resetDemo()">Reset demo</button></div>
+    </div>
+
+    <!-- Command Center -->
+    <section class="page-section active" id="page-command">
+      <!-- System Status Bar -->
+      <div class="system-status-bar" id="system-status-bar">
+        <div class="ssb-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          <span>AI model: <strong style="color:var(--warning)">Not connected</strong></span>
+        </div>
+        <div class="ssb-divider"></div>
+        <div class="ssb-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span>Camera feeds: <strong id="ssb-cameras" style="color:var(--text-tertiary)">None connected</strong></span>
+        </div>
+        <div class="ssb-divider"></div>
+        <div class="ssb-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span>Scenario engine: <strong style="color:var(--cyan)">Scripted demo</strong></span>
+        </div>
+        <div class="ssb-divider"></div>
+        <div class="ssb-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Safety assessment: <strong id="ssb-threat" style="color:var(--text-tertiary)">Not assessed</strong></span>
+        </div>
+        <div class="ssb-item" style="margin-left:auto">
+          <button class="global-search-trigger" onclick="openGlobalSearch()" title="Search (Ctrl+K)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Search</span>
+            <kbd>Ctrl+K</kbd>
+          </button>
+        </div>
+        <div class="ssb-item">
+          <button class="notif-bell" onclick="toggleNotifCenter()" title="Notifications">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-count" id="notif-count" style="display:none">0</span>
+          </button>
+        </div>
+        <div class="ssb-item">
+          <div class="live-dot"></div>
+          <span id="live-time">--</span>
+        </div>
+      </div>
+
+      <div class="page-header">
+        <h2>Care coordination concept</h2>
+        <div class="header-actions">
+          <button class="btn btn-outline btn-sm" onclick="generatePDFReport()" style="gap:6px;display:flex;align-items:center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Preview sample report
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="toggleWhatsAppPanel()" style="gap:6px;display:flex;align-items:center;border-color:#25D366;color:#25D366">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.625-1.468A11.93 11.93 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.16 0-4.163-.676-5.813-1.828l-.416-.279-2.746.872.735-2.668-.304-.438A9.712 9.712 0 0 1 2.25 12c0-5.385 4.365-9.75 9.75-9.75S21.75 6.615 21.75 12s-4.365 9.75-9.75 9.75z"/></svg>
+            Message-flow demo
+          </button>
+          <div class="header-time">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span id="ssb-online-count">Illustrative sample points</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid stats-grid-5">
+        <div class="stat-card blue">
+          <div class="label">Illustrative sites</div>
+          <div class="value" id="stat-orphanages">--</div>
+          <div class="sub"><span id="stat-online">--</span> sample status only</div>
+        </div>
+        <div class="stat-card green">
+          <div class="label">Sample child records</div>
+          <div class="value" id="stat-children">--</div>
+          <div class="sub">Fictional records only</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="label">Sample visitors</div>
+          <div class="value" id="stat-visitors">--</div>
+          <div class="sub">Simulated check-in flow</div>
+        </div>
+        <div class="stat-card red">
+          <div class="label">Sample reminders</div>
+          <div class="value" id="stat-alerts">--</div>
+          <div class="sub">No real-world action</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="label">Scenario prompts</div>
+          <div class="value" id="stat-incidents">--</div>
+          <div class="sub">Not AI detections</div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h3>Illustrative facility directory</h3>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="orphanage-search" placeholder="Search sample facilities..." oninput="filterOrphanageGrid(this.value)">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('orphanage-modal')">+ Add sample facility</button>
+        </div>
+      </div>
+      <div class="orphanage-grid" id="orphanage-grid"></div>
+
+      <div style="margin-top:24px" class="section-header"><h3>Sample review scenarios</h3></div>
+      <div class="alerts-list" id="command-incidents"></div>
+    </section>
+
+    <!-- Orphanage Detail View -->
+    <section class="page-section" id="page-detail">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="btn btn-outline btn-sm" onclick="closeDetail()">&#8592; Back</button>
+          <h2 id="detail-title">Orphanage Detail</h2>
+        </div>
+        <div class="header-time">
+          <div class="live-dot" id="detail-status-dot"></div>
+          <span id="detail-status-text">Online</span>
+        </div>
+      </div>
+
+      <div id="detail-header-info"></div>
+
+      <div class="detail-tabs">
+        <button class="detail-tab active" data-tab="overview" onclick="switchDetailTab('overview')">Overview</button>
+        <button class="detail-tab" data-tab="children" onclick="switchDetailTab('children')">Children</button>
+        <button class="detail-tab" data-tab="visitors" onclick="switchDetailTab('visitors')">Visitors</button>
+        <button class="detail-tab" data-tab="zones" onclick="switchDetailTab('zones')">Sample Zones</button>
+        <button class="detail-tab" data-tab="alerts" onclick="switchDetailTab('alerts')">Alerts</button>
+        <button class="detail-tab" data-tab="incidents" onclick="switchDetailTab('incidents')">Sample Scenarios</button>
+        <button class="detail-tab" data-tab="activity" onclick="switchDetailTab('activity')">Activity</button>
+      </div>
+
+      <div class="detail-tab-content active" id="dtab-overview"></div>
+      <div class="detail-tab-content" id="dtab-children"></div>
+      <div class="detail-tab-content" id="dtab-visitors"></div>
+      <div class="detail-tab-content" id="dtab-zones"></div>
+      <div class="detail-tab-content" id="dtab-alerts"></div>
+      <div class="detail-tab-content" id="dtab-incidents"></div>
+      <div class="detail-tab-content" id="dtab-activity"></div>
+    </section>
+
+    <!-- Punjab Map -->
+    <section class="page-section" id="page-map">
+      <div class="page-header">
+        <div><h2>Illustrative Punjab coverage</h2><p class="page-subtitle">83 fictional facility points across 37 localities; positions and labels are not a verified roster.</p></div>
+        <div class="header-time">
+          <span class="prototype-state">MAP DEMO</span>
+          <span>Base tiles need internet</span>
+        </div>
+      </div>
+      <div class="map-demo-toolbar">
+        <label><input type="checkbox" id="map-show-facilities" checked> Illustrative facilities <span class="map-count" id="facility-map-count">83</span></label>
+        <label><input type="checkbox" id="map-show-stations" checked> Response points <span class="map-count" id="station-map-count">30</span></label>
+        <button class="btn btn-outline btn-sm" onclick="fitPunjabMap()">Fit Punjab</button>
+      </div>
+      <div id="punjab-map" class="pitch-map"></div>
+      <p class="map-demo-note">Markers and response points are synthetic examples for interface exploration. They are not verified institutions, police locations, service coverage, or operational contacts.</p>
+    </section>
+
+    <!-- AI Violence Detection -->
+    <section class="page-section" id="page-incidents">
+      <div class="page-header">
+        <h2>Scenario review queue</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="incidents-search" placeholder="Search incidents..." oninput="filterIncidents(this.value)">
+          </div>
+          <span class="badge-status">Scripted scenarios · no model connected</span>
+          <button class="btn btn-outline" onclick="loadIncidents()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="detection-stats" id="detection-stats"></div>
+      <div class="alerts-list" id="incidents-list"></div>
+    </section>
+
+    <!-- Live Cameras -->
+    <section class="page-section" id="page-cameras">
+      <div class="page-header">
+        <h2>Camera workflow mockups</h2>
+        <div style="display:flex;gap:10px;align-items:center">
+          <select id="camera-org-filter" style="padding:8px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);color:var(--text-primary);font-size:12px;font-family:inherit;cursor:pointer;outline:none">
+            <option value="">All Orphanages</option>
+          </select>
+          <div class="header-time"><span class="prototype-state">NO FEEDS CONNECTED</span></div>
+        </div>
+      </div>
+      <div class="camera-stats" id="camera-stats"></div>
+      <div class="camera-grid" id="camera-grid"></div>
+    </section>
+
+    <!-- Children -->
+    <section class="page-section" id="page-children">
+      <div class="page-header">
+        <h2>Fictional child records</h2>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="children-search" placeholder="Search by name, age, orphanage..." oninput="filterChildren(this.value)">
+          </div>
+          <button class="btn btn-primary" onclick="openModal('child-modal')">+ Add sample record</button>
+        </div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Demo ID</th><th>Age</th><th>Sample field</th><th>Illustrative site</th><th>Sample date</th><th>Notes</th><th>Actions</th></tr></thead>
+        <tbody id="children-table"></tbody>
+      </table>
+    </section>
+
+    <!-- Visitors -->
+    <section class="page-section" id="page-visitors">
+      <div class="page-header">
+        <h2>Visitor workflow demo</h2>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="visitors-search" placeholder="Search sample visitor labels..." oninput="filterVisitors(this.value)">
+          </div>
+          <button class="btn btn-primary" onclick="openModal('visitor-modal')">+ Add sample visitor</button>
+        </div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Sample label</th><th>ID</th><th>Contact</th><th>Sample purpose</th><th>Illustrative site</th><th>Sample time</th><th>Demo state</th><th>Actions</th></tr></thead>
+        <tbody id="visitors-table"></tbody>
+      </table>
+    </section>
+
+    <!-- Alerts -->
+    <section class="page-section" id="page-alerts">
+      <div class="page-header">
+        <h2>Sample workflow reminders</h2>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="alerts-search" placeholder="Search alerts..." oninput="filterAlerts(this.value)">
+          </div>
+          <button class="btn btn-outline" onclick="loadAlerts()">Refresh</button>
+        </div>
+      </div>
+      <div class="alerts-list" id="alerts-list"></div>
+    </section>
+
+    <!-- Rankings -->
+    <section class="page-section" id="page-rankings">
+      <div class="page-header">
+        <h2>Illustrative data-readiness worksheet</h2>
+        <div class="header-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Sample completeness values · not a safety rating</span>
+        </div>
+      </div>
+      <div class="ranking-summary" id="ranking-summary"></div>
+      <div class="ranking-list" id="ranking-list"></div>
+    </section>
+
+    <!-- Orphanage Portal -->
+    <section class="page-section" id="page-portal">
+      <div id="portal-content"></div>
+    </section>
+
+    <!-- Analytics / Charts -->
+    <section class="page-section" id="page-analytics">
+      <div class="page-header">
+          <h2>Illustrative Workflow Analytics</h2>
+        <button class="btn btn-outline" onclick="loadAnalytics()">Refresh</button>
+      </div>
+      <div class="analytics-grid">
+        <div class="chart-card">
+          <h4>Incidents Over Last 7 Days</h4>
+          <canvas id="chart-incidents-timeline"></canvas>
+        </div>
+        <div class="chart-card">
+          <h4>Alerts by Type</h4>
+          <canvas id="chart-alerts-type"></canvas>
+        </div>
+        <div class="chart-card wide">
+          <h4>Incidents by Severity</h4>
+          <canvas id="chart-severity"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Emotions AI -->
+    <section class="page-section" id="page-emotions">
+      <div class="page-header">
+        <h2>Model and safeguarding readiness</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge-status">No model connected</span>
+          <button class="btn btn-outline" onclick="loadEmotions()">Refresh</button>
+        </div>
+      </div>
+      <div class="emotion-stats" id="emotion-stats"></div>
+      <div class="emotion-feed" id="emotion-feed"></div>
+    </section>
+
+    <!-- Anomalies -->
+    <section class="page-section" id="page-anomalies">
+      <div class="page-header">
+        <h2>Illustrative activity trends</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge-status">Sample data only</span>
+          <button class="btn btn-outline" onclick="loadAnomalies()">Refresh</button>
+        </div>
+      </div>
+      <div class="anomaly-list" id="anomaly-list"></div>
+    </section>
+
+    <!-- Daily Briefing -->
+    <section class="page-section" id="page-briefing">
+      <div class="page-header">
+        <h2>Pitch walkthrough summary</h2>
+        <button class="btn btn-outline" onclick="loadBriefing()">Refresh</button>
+      </div>
+      <div id="briefing-content"></div>
+    </section>
+
+    <!-- Activity -->
+    <section class="page-section" id="page-activity">
+      <div class="page-header">
+        <h2>Activity Log</h2>
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="activity-search" placeholder="Search activity..." oninput="filterActivity(this.value)">
+        </div>
+      </div>
+      <div class="activity-feed" id="activity-feed"></div>
+    </section>
+  </div>
+
+  <!-- Notification Center Panel -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-panel-header">
+      <h3>Notifications</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="markAllNotifsRead()">Mark All Read</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleNotifCenter()">&#10005;</button>
+      </div>
+    </div>
+    <div class="notif-panel-list" id="notif-panel-list"></div>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal-overlay" id="child-modal">
+    <div class="modal">
+      <h3>Add Sample Child Profile</h3>
+      <form id="child-form" onsubmit="addChild(event)">
+        <div class="form-group">
+          <label>Orphanage</label>
+          <select name="orphanage_id" class="orphanage-select" required></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Fictional label only</label><input type="text" name="name" placeholder="Demo Child" required></div>
+          <div class="form-group"><label>Example age</label><input type="number" name="age" min="0" max="18" required></div>
+        </div>
+        <div class="form-group"><label>Sample profile category</label><select name="gender"><option value="Sample">Illustrative record</option></select></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('child-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add sample profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="visitor-modal">
+    <div class="modal">
+      <h3>Preview Sample Visitor Flow</h3>
+      <form id="visitor-form" onsubmit="addVisitor(event)">
+        <div class="form-group">
+          <label>Orphanage</label>
+          <select name="orphanage_id" class="orphanage-select" required></select>
+        </div>
+        <div class="form-group"><label>Fictional label only</label><input type="text" name="name" placeholder="Sample Visitor" required></div>
+        <div class="form-group"><label>Example purpose</label><textarea name="purpose" rows="2" placeholder="Sample workflow" required></textarea></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('visitor-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Preview sample check-in</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="health-modal">
+    <div class="modal">
+      <h3>Health Records</h3>
+      <form id="health-form" onsubmit="addHealthRecord(event)">
+        <input type="hidden" name="child_id" id="health-child-id">
+        <div class="form-group"><label>Type</label><select name="record_type"><option>Vaccination</option><option>Checkup</option><option>Dental</option><option>Eye Exam</option><option>Emergency</option><option>Medication</option></select></div>
+        <div class="form-group"><label>Description</label><textarea name="description" rows="3" required></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>Doctor</label><input type="text" name="doctor_name"></div>
+          <div class="form-group"><label>Next Due</label><input type="date" name="next_due"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('health-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="incident-modal">
+    <div class="modal">
+      <h3>Incident Details</h3>
+      <div id="incident-detail"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal('incident-modal')">Close</button>
+        <button type="button" class="btn btn-primary" id="btn-review-incident">Mark as Reviewed</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="orphanage-modal">
+    <div class="modal">
+      <h3>Add Illustrative Facility Point</h3>
+      <form id="orphanage-form" onsubmit="addOrphanage(event)">
+        <p class="readiness-footnote">Creates an automatically generated fictional point in this local demo. No real facility details are collected.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('orphanage-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add sample point</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="growth-modal">
+    <div class="modal" style="max-width:550px">
+      <h3 id="growth-modal-title">Growth Tracker</h3>
+      <form id="growth-form" onsubmit="addGrowthRecord(event)">
+        <input type="hidden" name="child_id" id="growth-child-id">
+        <div class="form-row">
+          <div class="form-group"><label>Height (cm)</label><input type="number" name="height_cm" step="0.1" min="30" max="200" required></div>
+          <div class="form-group"><label>Weight (kg)</label><input type="number" name="weight_kg" step="0.1" min="2" max="100" required></div>
+        </div>
+        <div class="form-group"><label>Notes</label><textarea name="notes" rows="2" placeholder="Optional notes..."></textarea></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeModal('growth-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Record</button>
+        </div>
+      </form>
+      <div id="growth-chart-container" style="margin-top:16px">
+        <canvas id="chart-growth"></canvas>
+      </div>
+      <div id="growth-history"></div>
+    </div>
+  </div>
+
+  <!-- WhatsApp Alert Simulation Panel -->
+  <div class="whatsapp-panel" id="whatsapp-panel">
+    <div class="wa-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+        <span style="font-weight:600;color:#fff">Message-flow mockup</span>
+      </div>
+      <button onclick="toggleWhatsAppPanel()" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px">&times;</button>
+    </div>
+    <div class="wa-chat" id="wa-chat">
+      <div class="wa-date-divider">Illustrative conversation</div>
+      <div class="wa-msg system">
+        <div class="wa-msg-body">This panel previews a possible follow-up conversation. It is not connected to WhatsApp or any recipient.</div>
+        <div class="wa-msg-time">Local demo</div>
+      </div>
+      <div class="wa-msg incoming">
+        <div class="wa-msg-sender">Sample coordinator</div>
+        <div class="wa-msg-body">A sample review is ready. Please compare the example record with the follow-up checklist.</div>
+        <div class="wa-msg-time">Sample</div>
+      </div>
+      <div class="wa-msg incoming">
+        <div class="wa-msg-sender">Sample reviewer</div>
+        <div class="wa-msg-body">I reviewed the fictional workflow and added a follow-up note for demonstration.</div>
+        <div class="wa-msg-time">Sample</div>
+      </div>
+      <div class="wa-msg outgoing">
+        <div class="wa-msg-body">Thanks. I have recorded the sample handoff in this local preview.</div>
+        <div class="wa-msg-time">Sample</div>
+      </div>
+    </div>
+    <div class="wa-footer">
+      <div class="wa-recipient-info">
+        <strong>Recipients:</strong> None connected · text stays in this browser
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+        <input type="text" class="wa-input" placeholder="Fictional text only..." id="wa-input">
+        <button class="wa-send" onclick="sendWAMessage()">Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTITUTIONAL FOOTER -->
+  <footer class="institutional-footer" id="app-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <svg width="28" height="28" viewBox="0 0 36 36" fill="none"><path d="M18 2L4 8v10c0 9.55 5.97 18.48 14 20 8.03-1.52 14-10.45 14-20V8L18 2z" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1.5"/><circle cx="18" cy="16" r="5" stroke="#10b981" stroke-width="1.5" fill="none"/><path d="M18 21c-4 0-7 2-7 4v1h14v-1c0-2-3-4-7-4z" fill="#10b981" opacity="0.6"/></svg>
+        <div>
+      <strong>OrphanGuard</strong>
+          <span>OrphanGuard care coordination concept</span>
+        </div>
+      </div>
+      <div class="footer-links">
+        <span>Illustrative design exploration · no endorsement or certification</span>
+        <span class="footer-sep">|</span>
+        <span>No UNICEF partnership or certification is claimed</span>
+        <span class="footer-sep">|</span>
+        <span>No sensitive data should be entered in this demo</span>
+      </div>
+      <div class="footer-bottom">
+        <span>Independent concept prototype · not developed for or endorsed by a government agency</span>
+        <span class="footer-sep">|</span>
+        <span>For emergencies, use an independently verified official channel</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
